@@ -50,6 +50,13 @@ set(CMAKE_CXX_FLAGS_INIT "${C_CXX_FLAGS_INIT}")
 set(CMAKE_C_COMPILER_TARGET "${TARGET_TRIPLET}")
 set(CMAKE_CXX_COMPILER_TARGET "${TARGET_TRIPLET}")
 
+# .rc must be built with windres for the *target* machine; otherwise the default
+# host windres (e.g. clang64 x64) emits COFF that conflicts with arm64 link.
+if(EXISTS "${CMAKE_SYSROOT}/bin/windres.exe")
+  set(CMAKE_RC_COMPILER "${CMAKE_SYSROOT}/bin/windres.exe" CACHE FILEPATH
+                                                                 "windres for target triplet")
+endif()
+
 # Bypass check since it doesn't use the flags we set here.
 set(CMAKE_C_COMPILER_WORKS TRUE)
 set(CMAKE_CXX_COMPILER_WORKS TRUE)
