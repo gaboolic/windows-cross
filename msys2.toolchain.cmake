@@ -60,6 +60,10 @@ if(ARCH STREQUAL "ARM64"
                                                                  "llvm-windres (host)")
   set(CMAKE_RC_COMPILER_TARGET "aarch64-w64-windows-gnu" CACHE STRING
                                                                 "RC for ARM64 PE")
+  # CMake often still feeds windres-style rules without --target; lld then sees
+  # machine type x64 in the .res/.obj. Force ARM64 for llvm-windres explicitly.
+  set(CMAKE_RC_FLAGS "--target=aarch64-w64-windows-gnu" CACHE STRING
+                                                      "llvm-windres ARM64 COFF")
 elseif(EXISTS "${CMAKE_SYSROOT}/bin/windres.exe")
   set(CMAKE_RC_COMPILER "${CMAKE_SYSROOT}/bin/windres.exe" CACHE FILEPATH
                                                                  "windres for target triplet")
