@@ -50,9 +50,17 @@ set(CMAKE_CXX_FLAGS_INIT "${C_CXX_FLAGS_INIT}")
 set(CMAKE_C_COMPILER_TARGET "${TARGET_TRIPLET}")
 set(CMAKE_CXX_COMPILER_TARGET "${TARGET_TRIPLET}")
 
-# .rc must be built with windres for the *target* machine; otherwise the default
-# host windres (e.g. clang64 x64) emits COFF that conflicts with arm64 link.
-if(EXISTS "${CMAKE_SYSROOT}/bin/windres.exe")
+# Resource compiler: COFF must match the link target. Native build: use
+# sysroot windres. Cross ARM64 on x86_64 host: clangarm64 windres.exe is ARM64
+# and cannot run on GitHub runners — use host llvm-windres + target triplet.
+if(ARCH STREQUAL "ARM64"
+   AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "AMD64"
+   AND EXISTS "${HOST_SYSROOT}/bin/llvm-windres.exe")
+  set(CMAKE_RC_COMPILER "${HOST_SYSROOT}/bin/llvm-windres.exe" CACHE FILEPATH
+                                                                 "llvm-windres (host)")
+  set(CMAKE_RC_COMPILER_TARGET "aarch64-w64-windows-gnu" CACHE STRING
+                                                                "RC for ARM64 PE")
+elseif(EXISTS "${CMAKE_SYSROOT}/bin/windres.exe")
   set(CMAKE_RC_COMPILER "${CMAKE_SYSROOT}/bin/windres.exe" CACHE FILEPATH
                                                                  "windres for target triplet")
 endif()
